@@ -22,7 +22,6 @@
       </intent-filter>
     </activity>
 
-    <!-- TODO: Add the service for firebase -->
     <service
         android:name=".MyFirebaseMessagingService"
         android:exported="false">
