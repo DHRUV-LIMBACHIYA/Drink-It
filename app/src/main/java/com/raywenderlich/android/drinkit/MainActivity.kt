@@ -11,8 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
-import com.google.firebase.iid.FirebaseInstanceIdReceiver
-import com.google.firebase.iid.internal.FirebaseInstanceIdInternal
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -21,8 +19,6 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Main Screen
  */
 class MainActivity : AppCompatActivity() {
-
-    private lateinit var broadcastReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Switch to AppTheme for displaying the activity
@@ -43,48 +39,54 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        if(checkGooglePlayServices()){
+        if (checkGooglePlayServices()) {
             Log.i(TAG, "onCreate: Ready to receive notifications")
-        }else {
+        } else {
             Log.w(TAG, "Device doesn't have google play services")
         }
 
-        broadcastReceiver = object : BroadcastReceiver(){
-            override fun onReceive(context: Context?, intent: Intent?) {
-              text_view_notification.text = intent?.extras?.getString("message") // Set notification message into Notification TextView.
-            }
+        val bundle = intent.extras
+        bundle?.let { //bundle must contain all info sent in "data" field of the notification
+            text_view_notification.text = bundle.getString("text")
         }
-
     }
 
 
     override fun onStart() {
         super.onStart()
-        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, IntentFilter("MyData")) // Register LocalBroadCastManager
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            broadcastReceiver,
+            IntentFilter("MyData")
+        ) // Register LocalBroadCastManager
     }
 
     override fun onStop() {
         super.onStop()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver) // Unregister LocalBroadcastManager.
+        LocalBroadcastManager.getInstance(this)
+            .unregisterReceiver(broadcastReceiver) // Unregister LocalBroadcastManager.
     }
-
-    // TODO: Add a method for receiving notifications
-
 
 
     // A function to check for Google Play Services
-    private fun checkGooglePlayServices(): Boolean{
-        val status = GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this) // Check google play service availability.
-        return if(status != ConnectionResult.SUCCESS){
+    private fun checkGooglePlayServices(): Boolean {
+        val status = GoogleApiAvailabilityLight.getInstance()
+            .isGooglePlayServicesAvailable(this) // Check google play service availability.
+        return if (status != ConnectionResult.SUCCESS) {
             Log.e(TAG, "checkGooglePlayServices: Google Play Service is not available")
             false
-        }else {
+        } else {
             Log.i(TAG, "checkGooglePlayServices: Google Play Service is available")
             true
         }
     }
 
-    // TODO: Create a message receiver constant
+
+    private val broadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            text_view_notification.text =
+                intent?.extras?.getString("message") // Set notification payload into Notification TextView.
+        }
+    }
 
     companion object {
         private const val TAG = "MainActivity"
