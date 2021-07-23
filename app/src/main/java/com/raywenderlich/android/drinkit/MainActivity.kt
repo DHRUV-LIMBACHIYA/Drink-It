@@ -1,9 +1,14 @@
 package com.raywenderlich.android.drinkit
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.google.firebase.iid.FirebaseInstanceIdReceiver
@@ -16,6 +21,8 @@ import kotlinx.android.synthetic.main.activity_main.*
  * Main Screen
  */
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var broadcastReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Switch to AppTheme for displaying the activity
@@ -42,18 +49,23 @@ class MainActivity : AppCompatActivity() {
             Log.w(TAG, "Device doesn't have google play services")
         }
 
-        // TODO: check in bundle extras for notification data
+        broadcastReceiver = object : BroadcastReceiver(){
+            override fun onReceive(context: Context?, intent: Intent?) {
+              text_view_notification.text = intent?.extras?.getString("message") // Set notification message into Notification TextView.
+            }
+        }
+
     }
 
 
     override fun onStart() {
         super.onStart()
-        //TODO: Register the receiver for notifications
+        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, IntentFilter("MyData")) // Register LocalBroadCastManager
     }
 
     override fun onStop() {
         super.onStop()
-        // TODO: Unregister the receiver for notifications
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver) // Unregister LocalBroadcastManager.
     }
 
     // TODO: Add a method for receiving notifications
