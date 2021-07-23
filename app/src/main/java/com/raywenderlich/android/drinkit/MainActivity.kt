@@ -11,7 +11,6 @@ import com.google.firebase.iid.internal.FirebaseInstanceIdInternal
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
 
-// TODO: import libraries
 
 /**
  * Main Screen
