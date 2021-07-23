@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.google.firebase.iid.FirebaseInstanceIdReceiver
 import com.google.firebase.iid.internal.FirebaseInstanceIdInternal
 import com.google.firebase.messaging.FirebaseMessaging
@@ -29,13 +31,16 @@ class MainActivity : AppCompatActivity() {
                     Log.w(TAG, "Fetching FCM registration token failed", task.exception)
                     return@addOnCompleteListener
                 }
-
                 val token = task.result // Token
-
                 val message = getString(R.string.token_prefix, token)
-
                 Toast.makeText(baseContext, message, Toast.LENGTH_LONG).show()
             }
+        }
+
+        if(checkGooglePlayServices()){
+            Log.i(TAG, "onCreate: Ready to receive notifications")
+        }else {
+            Log.w(TAG, "Device doesn't have google play services")
         }
 
         // TODO: check in bundle extras for notification data
@@ -51,9 +56,22 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         // TODO: Unregister the receiver for notifications
     }
+
     // TODO: Add a method for receiving notifications
 
-    // TODO: Add a function to check for Google Play Services
+
+
+    // A function to check for Google Play Services
+    private fun checkGooglePlayServices(): Boolean{
+        val status = GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this) // Check google play service availability.
+        return if(status != ConnectionResult.SUCCESS){
+            Log.e(TAG, "checkGooglePlayServices: Google Play Service is not available")
+            false
+        }else {
+            Log.i(TAG, "checkGooglePlayServices: Google Play Service is available")
+            true
+        }
+    }
 
     // TODO: Create a message receiver constant
 
